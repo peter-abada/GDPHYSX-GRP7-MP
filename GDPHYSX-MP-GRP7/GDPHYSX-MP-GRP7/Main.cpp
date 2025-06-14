@@ -10,6 +10,7 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "Model.hpp"
 #include "Camera.hpp"
 #include "OrthoCamera.hpp"
+#include "PersCamera.hpp"
 #include "Shader.hpp"
 
 #include "Physics/Vector.hpp"
@@ -19,16 +20,24 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "Physics/DragForceGenerator.hpp"
 #include "Physics/ConstantForceGenerator.hpp"
 
-float pAccel = 0;
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-        pAccel += 0.1;
-    }
-}
+/*
+
+    TODO:
+        CONTROLS:
+        > Switch between ortho and perspective projection via '1' and '2'
+        > Rotate camera using WASD
+        > Play and pause using SPACE
+
+        PARTICLE:
+        > Random colors
+        > Random size (vary the radius)
+        > 1 - 10 second lifespan (stop rendering the particle when its life span is over)
+
+*/
 
 int main(void)
 {
-    float width = 600.0f, height = 600.0f;
+    float width = 800.0f, height = 800.0f;
 
     GLFWwindow* window;
 
@@ -37,7 +46,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(width, height, "PC01 Peter Abada", NULL, NULL);
+    window = glfwCreateWindow(width, height, "GDPHYSX Group 7 - The Physics Engine", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -48,9 +57,9 @@ int main(void)
     glfwMakeContextCurrent(window);
     gladLoadGL();
 
-    glViewport(0, 0, 600, 600);
+    glViewport(0, 0, 800, 800);
 
-    glfwSetKeyCallback(window, key_callback);
+    //glfwSetKeyCallback(window, key_callback);
 
     Shader shader("Shaders/Shader.vert", "Shaders/Shader.frag");
     glLinkProgram(shader.getProg());
@@ -113,21 +122,29 @@ int main(void)
     Model model(glm::vec3(0.0f, 0.0f, 0.0f), shader.getProg(), VAO, mesh_indices);
     
     OrthoCamera camera(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    
-    Physics::Vector sample(2, 3, -4);
-    Physics::Vector sample2(-3, -2, 2);
-    Physics::Vector sum = sample & sample2;
+    PersCamera persCamera(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
     /* Loop until the user closes the window */
 
     Physics::PhysicsWorld world;
     std::list<RenderParticle*> renderParticles;
+    int sparkNumber = 50;
 
     srand(time(NULL));
 
-    Physics::PhysicsParticle p1 = Physics::PhysicsParticle();
+    for (int i = 0; i < sparkNumber; i++) {
+        Physics::PhysicsParticle* particle = new Physics::PhysicsParticle();
+        particle->position = Physics::Vector(0 + rand() % 30, 0, 0);
+        particle->mass = 0.5;
+        world.addParticle(particle);
+        RenderParticle* renderParticle = new RenderParticle(particle, &model, Physics::Vector(0.4, 0, 0));
+        renderParticles.push_back(renderParticle);
+        Physics::ConstantForceGenerator constForce = Physics::ConstantForceGenerator(Physics::Vector(0, 1, 0));
+        world.forceRegistry.add(particle, &constForce);
+    }
+
+    /*Physics::PhysicsParticle p1 = Physics::PhysicsParticle();
     p1.position = Physics::Vector(-50, 40, 0);
     p1.mass = 1;
-    //p1.addForce(Physics::Vector(rand() % 600 + 500, 0, 0));
     world.addParticle(&p1);
     RenderParticle rp1 = RenderParticle(&p1, &model, Physics::Vector(0.4, 0, 0));
     rp1.color = Physics::Vector(1, 0, 0);
@@ -167,7 +184,7 @@ int main(void)
     world.addParticle(&p4);
     RenderParticle rp4 = RenderParticle(&p4, &model, Physics::Vector(0, 0.5f, 0));
     rp4.color = Physics::Vector(0.5, 0.5, 0.5);
-    renderParticles.push_back(&rp4);
+    renderParticles.push_back(&rp4);*/
 
     using clock = std::chrono::high_resolution_clock;
     auto curr_time = clock::now();
@@ -180,17 +197,9 @@ int main(void)
     camera.setPosition(newPosition);
     glm::mat4 viewMatrix = camera.getViewMatrix();
 
-    srand(time(NULL));
-    //float p1f = rand() % 8 + 1;
-    float p2f = rand() % 8 + 1;
-    float p3f = rand() % 8 + 1;
+    std::cout << renderParticles.size() << "\n";
 
-    int p1time = 0;
-    int p2time = 0;
-    int p3time = 0;
-    int p4time = 0;
-
-    while (!glfwWindowShouldClose(window) && (p1.position.x < 50 || p2.position.x < 50 || p3.position.x < 50 || p4.position.x < 50)) {
+    while (!glfwWindowShouldClose(window)) {
 
         curr_time = clock::now();
         auto dur = std::chrono::duration_cast<std::chrono::nanoseconds> (curr_time - prev_time);
@@ -205,18 +214,8 @@ int main(void)
             //Update
             //std::cout << "Update" << "\n";
             world.update((float)ms.count() / 1000);
-            pAccel == 0;
-            if (p1.position.x < 50)
-                p1time++;
-            if (p2.position.x < 50)
-                p2time++;
-            if (p3.position.x < 50)
-                p3time++;
-            if (p4.position.x < 50)
-                p4time++;
         }
         //std::cout << "Normal" << "\n";
-        p4.addForce(Physics::Vector(pAccel, 0, 0));
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         //Camera position
@@ -240,11 +239,6 @@ int main(void)
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-
-    std::cout << "P1 Time: " << p1time / 64 << "\n";
-    std::cout << "P2 Time: " << p2time / 64 << "\n";
-    std::cout << "P3 Time: " << p3time / 64 << "\n";
-    std::cout << "P4 Time: " << p4time / 64 << "\n";
 
     glfwTerminate();
     return 0;

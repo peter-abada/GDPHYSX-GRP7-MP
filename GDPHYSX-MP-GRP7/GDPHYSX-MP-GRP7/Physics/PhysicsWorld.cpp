@@ -3,7 +3,7 @@
 void Physics::PhysicsWorld::addParticle(Physics::PhysicsParticle* toAdd) {
 	particles.push_back(toAdd);
 
-	//forceRegistry.add(toAdd, &gravity);
+	forceRegistry.add(toAdd, &gravity);
 }
 
 void Physics::PhysicsWorld::update(float time) {

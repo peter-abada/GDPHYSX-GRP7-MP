@@ -143,6 +143,7 @@
     <ClInclude Include="Physics\ForceGenerator.hpp" />
     <ClInclude Include="Physics\ForceRegistry.hpp" />
     <ClInclude Include="Physics\GravityForceGenerator.hpp" />
+    <ClInclude Include="PersCamera.hpp" />
     <ClInclude Include="Physics\PhysicsParticle.hpp" />
     <ClInclude Include="Physics\PhysicsWorld.hpp" />
     <ClInclude Include="Physics\Vector.hpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="Physics\ForceGenerator.cpp" />
     <ClCompile Include="Physics\ForceRegistry.cpp" />
     <ClCompile Include="Physics\GravityForceGenerator.cpp" />
+    <ClCompile Include="PersCamera.cpp" />
     <ClCompile Include="Physics\PhysicsParticle.cpp" />
     <ClCompile Include="Physics\PhysicsWorld.cpp" />
     <ClCompile Include="Physics\Vector.cpp" />

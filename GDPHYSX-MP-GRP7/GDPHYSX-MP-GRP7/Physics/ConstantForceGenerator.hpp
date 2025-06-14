@@ -8,7 +8,7 @@
 namespace Physics {
 	class ConstantForceGenerator : public ForceGenerator {
 	private:
-		Vector force = Vector(1, 0, 0);
+		Vector force = Vector(0, 1, 0);
 
 	public:
 		ConstantForceGenerator(Vector _force) : force(_force) {}

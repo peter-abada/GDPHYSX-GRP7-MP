@@ -15,6 +15,8 @@ namespace Physics {
 
 		Physics::Vector accel;
 
+		float lifespan;
+
 		float damping = 0.9f;
 
 	protected:
