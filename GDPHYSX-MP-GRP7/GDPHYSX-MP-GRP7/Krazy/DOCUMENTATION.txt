@@ -3,6 +3,15 @@ By Group 7 for GDPHYSX XX22
 
 ENGINE CLASSES:
 
+class ClassName
+	> class description
+		* type variableName
+			> variable description
+
+		- type methodName(type param)
+			@ type param - parameter description
+			> method description
+
 class Vector
 	> Class for vector values (x, y, z), 
 	  including operations on vectors useful for physics simulations
@@ -68,7 +77,7 @@ class PhysicsParticle
 
 		- void updatePosition(float time)
 			@ float time - time in milliseconds for updating particle object
-			> updates the particle object's position using the displacement formula
+			> updates the particle object's position using latest position formula
 
 		- void updateVelocity(float time)
 			@ float time - time in milliseconds for updating particle object
@@ -89,3 +98,60 @@ class PhysicsParticle
 
 class PhysicsWorld
 	> a class that handles all particle object updates and forces
+		* ForceRegistry forceRegistry
+			> a force registry object for storing force generators to be applied to particle objects
+
+		* list<PhysicsParticle*> particles
+			> the global list of particle objects present in the scene
+
+		- void addParticle(PhysicsParticle* toAdd)
+			@ PhysicsParticle* toAdd - the particle object to add to the particle list
+			> adds a particle object to the particle list in the world
+
+		- void update(float time)
+			@ float time - time in milliseconds for updating particle object
+			> updates all particle objects contained in the particle list by iterating
+			through each particle object and calling its update() function
+
+class ForceGenerator
+	> a parent class for force generators
+		- virtual void updateForce(PhysicsParticle* p, float time)
+			@ PhysicsParticle* p - particle object to be acted upon by a force
+			float time - time in milliseconds for updating particle object
+			> a virtual function to be overridden by child classes; adds a force to a particle object
+
+class GravityForceGenerator > extends ForceGenerator
+	> force generator for gravity
+		- GravityForceGenerator(const Vector gravity)
+			@ const Vector gravity - gravitational force represented as a Vector object
+			> constructor function
+
+		- void updateForce(PhysicsParticle* particle, float time)
+			@ Physics* particle - particle object to receive gravitational force
+			@ float time - time in milliseconds for updating particle object
+			> updates the particle object's gravitation force, does nothing if mass is a non-positive number
+
+class ForceRegistry
+	> a class handling and storing force generators to be applied to particles
+		* protected struct particleForceRegistry
+			> a data structure containing a particle object and a force generator object
+
+		* protected list<particleForceRegistry> registry
+			>a list of particleForceRegistry structures
+
+		- void add(PhysicsParticle* particle, ForceGenerator* generator)
+			@ PhysicsParticle* particle - a particle object to be affected by a force
+			@ ForceGenerator* generator - a force generator object to act upon a particle
+			> adds a force generator to a particle, then pushes the pair to the registry
+
+		- void clear()
+			> clears the force registry
+
+		- void remove(PhysicsParticle* particle, ForceGenerator* generator)
+			@ PhysicsParticle* particle - a particle object to be removed
+			@ ForceGenerator* generator - a force generator object to be removed
+			> removes a particle and force generator pair from the list
+
+		- void updateForces(float time)
+			@ float time - time in milliseconds for updating particle object
+			> updates forces in generator objects in registry pair

@@ -21,7 +21,6 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "Krazy/PhysicsParticle.hpp"
 #include "Krazy/PhysicsWorld.hpp"
 #include "RenderParticle.hpp"
-#include "Krazy/DragForceGenerator.hpp"
 
 int main(void)
 {
