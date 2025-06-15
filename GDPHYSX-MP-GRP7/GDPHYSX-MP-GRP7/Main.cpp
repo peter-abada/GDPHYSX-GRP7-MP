@@ -134,7 +134,9 @@ int main(void)
 
     Physics::PhysicsWorld world;
     std::list<RenderParticle*> renderParticles;
-    int sparkNumber = 500;
+    int sparkNumber = 0;
+    std::cout << "Enter particle amount (integer): ";
+    std::cin >> sparkNumber;
 
     srand(static_cast<unsigned int>(time(NULL)));
 
