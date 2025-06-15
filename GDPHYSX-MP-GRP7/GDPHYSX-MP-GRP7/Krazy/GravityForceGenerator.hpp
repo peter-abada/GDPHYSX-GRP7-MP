@@ -3,7 +3,7 @@
 
 #include "ForceGenerator.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class GravityForceGenerator : public ForceGenerator {
 	private:
 		Vector Gravity = Vector(0, -9.8, 0);

@@ -1,6 +1,6 @@
 #include "DragForceGenerator.hpp"
 
-void Physics::DragForceGenerator::updateForce(PhysicsParticle* particle, float time) {
+void Krazy::DragForceGenerator::updateForce(PhysicsParticle* particle, float time) {
 	Vector force = Vector(0, 0, 0);
 	Vector currentV = particle->velocity;
 

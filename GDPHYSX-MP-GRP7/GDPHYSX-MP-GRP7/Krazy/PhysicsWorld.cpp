@@ -1,24 +1,24 @@
 #include "PhysicsWorld.hpp"
 
-void Physics::PhysicsWorld::addParticle(Physics::PhysicsParticle* toAdd) {
+void Krazy::PhysicsWorld::addParticle(Krazy::PhysicsParticle* toAdd) {
 	particles.push_back(toAdd);
 
 	forceRegistry.add(toAdd, &gravity);
 }
 
-void Physics::PhysicsWorld::update(float time) {
+void Krazy::PhysicsWorld::update(float time) {
 	updateParticleList();
 
 	forceRegistry.updateForces(time);
 
-	for (std::list<Physics::PhysicsParticle*>::iterator p = particles.begin();
+	for (std::list<Krazy::PhysicsParticle*>::iterator p = particles.begin();
 		p != particles.end();
 		p++) {
 		(*p)->update(time);
 	}
 }
 
-void Physics::PhysicsWorld::updateParticleList() {
+void Krazy::PhysicsWorld::updateParticleList() {
 	particles.remove_if([](PhysicsParticle* p) {
 		return p->isDestroy();
 		});

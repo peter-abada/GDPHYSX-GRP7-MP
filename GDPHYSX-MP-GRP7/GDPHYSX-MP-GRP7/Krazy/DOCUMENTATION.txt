@@ -1,0 +1,91 @@
+THE KRAZY PHYSICS ENGINE DOCUMENTATION
+By Group 7 for GDPHYSX XX22
+
+ENGINE CLASSES:
+
+class Vector
+	> Class for vector values (x, y, z), 
+	  including operations on vectors useful for physics simulations
+		* float x, float y, float z - 
+		  > x, y, and z values of the vector object
+
+		- float Magnitude() - 
+		  > returns the magnitude of the vector object's x, y, and z values
+
+		- Vector Normalize()
+		  > returns the normalized vector of the vector's x, y, and z values, representing the vector's direction
+
+		- Vector operator+ && void operator+=
+		  > performs vector addition on the vector object and another vector object
+
+		- Vector operator- && void operator-=
+		  > performs vector subtraction on the vector object and another vector object
+
+		- Vector operator* && void operator *=
+		  > performs scalar multiplication on the vector object and a float value
+
+		- Vector operator / && void operator /=
+		  > performs scalar division on the vector object and a float value
+
+		- float operator,
+		  > performs scalar (dot) multiplication on the vector object and another vector object
+
+		- Vector operator&
+		  > performs vector (cross) multiplication on the vector object and another vector object
+
+		- Vector operator%
+		  > performs component multiplication on the vector object and another vector object
+
+class PhysicsParticle
+	> main class for particle objects of the engine's particle system
+		* float mass
+			> mass of the particle object
+
+		* Vector position
+			> position of the particle object represented as a Vector object
+
+		* Vector velocity
+			> velocity of the particle object represented as a Vector object
+
+		* Vector accel
+			> acceleration of the particle object represented as a Vector object
+
+		* float lifespan
+			> the time, represented in seconds, that a particle will be rendered on screen; ranges from 1 - 10
+
+		* float damping
+			> the damping factor applied to the particle object
+
+		* protected bool isDestroyed
+			> flag for particle state; particle will not be rendered if true; false by default
+
+		* protected Vector accumulatedForce
+			> the total forces acting upon the particle object
+
+		- void update(float time)
+			@ float time - time in milliseconds for updating particle object
+			> updates the particle object's position and velocity, then resets any forces acting upon it
+
+		- void updatePosition(float time)
+			@ float time - time in milliseconds for updating particle object
+			> updates the particle object's position using the displacement formula
+
+		- void updateVelocity(float time)
+			@ float time - time in milliseconds for updating particle object
+			> updates the particle object's velocity taking into account forces acting upon the particle
+
+		- void isDestroy()
+			> returns the value of isDestroyed
+
+		- void destroy()
+			> sets isDestroyed to true
+
+		- void addForce(Vector force)
+			@ Vector force - the force acting upon the particle represented as a Vector object
+			> adds a force Vector value to the accumulated force
+
+		- void resetForce()
+			> resets the particle's accumulated forces and acceleration to 0
+
+class PhysicsWorld
+	> a class that handles all particle object updates and forces

@@ -16,12 +16,12 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "PersCamera.hpp"
 #include "Shader.hpp"
 
-#include "Physics/Vector.hpp"
-#include "Physics/PhysicsParticle.hpp"
-#include "Physics/PhysicsWorld.hpp"
+//Krazy Engine classes
+#include "Krazy/Vector.hpp"
+#include "Krazy/PhysicsParticle.hpp"
+#include "Krazy/PhysicsWorld.hpp"
 #include "RenderParticle.hpp"
-#include "Physics/DragForceGenerator.hpp"
-#include "Physics/ConstantForceGenerator.hpp"
+#include "Krazy/DragForceGenerator.hpp"
 
 int main(void)
 {
@@ -32,7 +32,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    window = glfwCreateWindow(width, height, "GDPHYSX Group 7 - The Physics Engine", NULL, NULL);
+    window = glfwCreateWindow(width, height, "GDPHYSX Group 7 - The Krazy Engine", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -132,18 +132,24 @@ int main(void)
 
     Model model(glm::vec3(0.0f, 0.0f, 0.0f), shader.getProg(), VAO, mesh_indices);
 
-    Physics::PhysicsWorld world;
+    Krazy::PhysicsWorld world;
     std::list<RenderParticle*> renderParticles;
+
+    //Particle count is taken using user input in the CLI
     int sparkNumber = 0;
     std::cout << "Enter particle amount (integer): ";
     std::cin >> sparkNumber;
 
     srand(static_cast<unsigned int>(time(NULL)));
 
+    //For each particle
     for (int i = 0; i < sparkNumber; i++) {
-        Physics::PhysicsParticle* particle = new Physics::PhysicsParticle();
-        particle->position = Physics::Vector(0, -40, 0); // Firework origin
 
+        //Create new particle object
+        Krazy::PhysicsParticle* particle = new Krazy::PhysicsParticle();
+        particle->position = Krazy::Vector(0, -40, 0); // Firework origin
+
+        //Randomize speed
         float theta = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.1415926f;
         float phi = (static_cast<float>(rand()) / RAND_MAX) * (3.1415926f / 12.0f); // [0, pi/12] 15 deg
         float speed = 30.0f + static_cast<float>(rand()) / RAND_MAX * 20.0f;
@@ -152,12 +158,13 @@ int main(void)
         float vy = speed * cos(phi);
         float vz = speed * sin(phi) * sin(theta);
 
-        particle->velocity = Physics::Vector(vx, vy, vz);
+        particle->velocity = Krazy::Vector(vx, vy, vz);
 
         particle->mass = 0.5f;
         particle->lifespan = 1.0f + static_cast<float>(rand()) / RAND_MAX * 9.0f;
         world.addParticle(particle);
 
+        //Randomize color
         float r = static_cast<float>(rand()) / RAND_MAX;
         float g = static_cast<float>(rand()) / RAND_MAX;
         float b = static_cast<float>(rand()) / RAND_MAX;
@@ -167,7 +174,7 @@ int main(void)
         glm::vec3 scaleVec(scale, scale, scale);
         particleModel->setScale(scaleVec);
 
-        RenderParticle* renderParticle = new RenderParticle(particle, particleModel, Physics::Vector(r, g, b));
+        RenderParticle* renderParticle = new RenderParticle(particle, particleModel, Krazy::Vector(r, g, b));
         renderParticles.push_back(renderParticle);
     }
 
@@ -181,13 +188,12 @@ int main(void)
     bool onePressedLastFrame = false;
     bool twoPressedLastFrame = false;
 
-    std::cout << renderParticles.size() << "\n";
-
     while (!glfwWindowShouldClose(window)) {
 
         glfwPollEvents();
 
         float orbitSpeed = 1.5f * (float)timestep.count() / 1e9f;
+        //Camera controls (via WASD)
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camYaw += orbitSpeed;
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camYaw -= orbitSpeed;
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camPitch += orbitSpeed;
@@ -232,7 +238,7 @@ int main(void)
 
             std::list<RenderParticle*>::iterator it = renderParticles.begin();
             while (it != renderParticles.end()) {
-                Physics::PhysicsParticle* p = (*it)->particle;
+                Krazy::PhysicsParticle* p = (*it)->particle;
                 if (!paused) p->lifespan -= (float)ms.count() / 1000.0f;
                 if (p->lifespan <= 0.0f) {
                     delete (*it)->renderObj;

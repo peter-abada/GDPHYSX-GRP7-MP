@@ -36,28 +36,25 @@
     <ClInclude Include="Camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\ConstantForceGenerator.hpp">
+    <ClInclude Include="Krazy\DragForceGenerator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\DragForceGenerator.hpp">
+    <ClInclude Include="Krazy\ForceGenerator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\ForceGenerator.hpp">
+    <ClInclude Include="Krazy\ForceRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\ForceRegistry.hpp">
+    <ClInclude Include="Krazy\GravityForceGenerator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\GravityForceGenerator.hpp">
+    <ClInclude Include="Krazy\PhysicsParticle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\PhysicsParticle.hpp">
+    <ClInclude Include="Krazy\PhysicsWorld.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\PhysicsWorld.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Vector.hpp">
+    <ClInclude Include="Krazy\Vector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PersCamera.hpp">
@@ -86,32 +83,33 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\ConstantForceGenerator.cpp">
+    <ClCompile Include="Krazy\DragForceGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\DragForceGenerator.cpp">
+    <ClCompile Include="Krazy\ForceGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\ForceGenerator.cpp">
+    <ClCompile Include="Krazy\ForceRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\ForceRegistry.cpp">
+    <ClCompile Include="Krazy\GravityForceGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\GravityForceGenerator.cpp">
+    <ClCompile Include="Krazy\PhysicsParticle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\PhysicsParticle.cpp">
+    <ClCompile Include="Krazy\PhysicsWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\PhysicsWorld.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Vector.cpp">
+    <ClCompile Include="Krazy\Vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PersCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
+    <Text Include="Krazy\DOCUMENTATION.txt" />
   </ItemGroup>
 </Project>

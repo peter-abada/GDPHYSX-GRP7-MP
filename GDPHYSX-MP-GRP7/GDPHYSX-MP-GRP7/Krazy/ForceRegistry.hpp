@@ -5,7 +5,7 @@
 #include "ForceGenerator.hpp"
 #include "list"
 
-namespace Physics {
+namespace Krazy {
 	class ForceRegistry{
 	public:
 		void add(PhysicsParticle* particle, ForceGenerator* generator);

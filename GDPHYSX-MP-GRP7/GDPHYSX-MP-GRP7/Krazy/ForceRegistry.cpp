@@ -1,6 +1,6 @@
 #include "ForceRegistry.hpp"
 
-void Physics::ForceRegistry::add(PhysicsParticle* particle, ForceGenerator* generator) {
+void Krazy::ForceRegistry::add(PhysicsParticle* particle, ForceGenerator* generator) {
 	particleForceRegistry toAdd;
 	toAdd.particle = particle;
 	toAdd.generator = generator;
@@ -8,11 +8,11 @@ void Physics::ForceRegistry::add(PhysicsParticle* particle, ForceGenerator* gene
 	registry.push_back(toAdd);
 }
 
-void Physics::ForceRegistry::clear() {
+void Krazy::ForceRegistry::clear() {
 	registry.clear();
 }
 
-void Physics::ForceRegistry::remove(PhysicsParticle* particle, ForceGenerator* generator) {
+void Krazy::ForceRegistry::remove(PhysicsParticle* particle, ForceGenerator* generator) {
 	registry.remove_if(
 		[particle, generator](particleForceRegistry reg) {
 			return reg.particle == particle && reg.generator == generator;
@@ -20,7 +20,7 @@ void Physics::ForceRegistry::remove(PhysicsParticle* particle, ForceGenerator* g
 	);
 }
 
-void Physics::ForceRegistry::updateForces(float time) {
+void Krazy::ForceRegistry::updateForces(float time) {
 	for (std::list<particleForceRegistry>::iterator i = registry.begin();
 		i != registry.end();
 		i++) {

@@ -3,17 +3,17 @@
 
 #include "Vector.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class PhysicsParticle {
 
 	public:
 		float mass = 0;
 
-		Physics::Vector position;
+		Krazy::Vector position;
 
-		Physics::Vector velocity;
+		Krazy::Vector velocity;
 
-		Physics::Vector accel;
+		Krazy::Vector accel;
 
 		float lifespan;
 
@@ -26,7 +26,7 @@ namespace Physics {
 
 		bool isDestroyed = false;
 
-		Physics::Vector accumulatedForce = Physics::Vector(0, 0, 0);
+		Krazy::Vector accumulatedForce = Krazy::Vector(0, 0, 0);
 
 	public:
 		void update(float time);
@@ -35,7 +35,7 @@ namespace Physics {
 
 		bool isDestroy();
 
-		void addForce(Physics::Vector force);
+		void addForce(Krazy::Vector force);
 		void resetForce();
 	};
 }

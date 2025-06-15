@@ -138,15 +138,14 @@
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
-    <ClInclude Include="Physics\ConstantForceGenerator.hpp" />
-    <ClInclude Include="Physics\DragForceGenerator.hpp" />
-    <ClInclude Include="Physics\ForceGenerator.hpp" />
-    <ClInclude Include="Physics\ForceRegistry.hpp" />
-    <ClInclude Include="Physics\GravityForceGenerator.hpp" />
+    <ClInclude Include="Krazy\DragForceGenerator.hpp" />
+    <ClInclude Include="Krazy\ForceGenerator.hpp" />
+    <ClInclude Include="Krazy\ForceRegistry.hpp" />
+    <ClInclude Include="Krazy\GravityForceGenerator.hpp" />
     <ClInclude Include="PersCamera.hpp" />
-    <ClInclude Include="Physics\PhysicsParticle.hpp" />
-    <ClInclude Include="Physics\PhysicsWorld.hpp" />
-    <ClInclude Include="Physics\Vector.hpp" />
+    <ClInclude Include="Krazy\PhysicsParticle.hpp" />
+    <ClInclude Include="Krazy\PhysicsWorld.hpp" />
+    <ClInclude Include="Krazy\Vector.hpp" />
     <ClInclude Include="RenderParticle.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="stb_image.h" />
@@ -158,17 +157,20 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />
-    <ClCompile Include="Physics\ConstantForceGenerator.cpp" />
-    <ClCompile Include="Physics\DragForceGenerator.cpp" />
-    <ClCompile Include="Physics\ForceGenerator.cpp" />
-    <ClCompile Include="Physics\ForceRegistry.cpp" />
-    <ClCompile Include="Physics\GravityForceGenerator.cpp" />
+    <ClCompile Include="Krazy\DragForceGenerator.cpp" />
+    <ClCompile Include="Krazy\ForceGenerator.cpp" />
+    <ClCompile Include="Krazy\ForceRegistry.cpp" />
+    <ClCompile Include="Krazy\GravityForceGenerator.cpp" />
     <ClCompile Include="PersCamera.cpp" />
-    <ClCompile Include="Physics\PhysicsParticle.cpp" />
-    <ClCompile Include="Physics\PhysicsWorld.cpp" />
-    <ClCompile Include="Physics\Vector.cpp" />
+    <ClCompile Include="Krazy\PhysicsParticle.cpp" />
+    <ClCompile Include="Krazy\PhysicsWorld.cpp" />
+    <ClCompile Include="Krazy\Vector.cpp" />
     <ClCompile Include="RenderParticle.cpp" />
     <ClCompile Include="Shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Krazy\DOCUMENTATION.txt" />
+    <Text Include="README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

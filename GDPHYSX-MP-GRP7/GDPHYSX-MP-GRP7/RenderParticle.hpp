@@ -1,18 +1,18 @@
 #ifndef RENDERPARTICLE_HPP
 #define RENDERPARTICLE_HPP
 
-#include "Physics/PhysicsParticle.hpp"
+#include "Krazy/PhysicsParticle.hpp"
 #include "Model.hpp"
 
 class RenderParticle {
 public:
-	Physics::PhysicsParticle* particle;
+	Krazy::PhysicsParticle* particle;
 	Model* renderObj;
-	Physics::Vector color;
+	Krazy::Vector color;
 
-	RenderParticle(Physics::PhysicsParticle* p, Model* obj);
+	RenderParticle(Krazy::PhysicsParticle* p, Model* obj);
 
-	RenderParticle(Physics::PhysicsParticle* p, Model* obj, Physics::Vector c);
+	RenderParticle(Krazy::PhysicsParticle* p, Model* obj, Krazy::Vector c);
 
 	void draw();
 };

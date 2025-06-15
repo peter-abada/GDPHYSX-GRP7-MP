@@ -3,10 +3,10 @@
 
 #include "PhysicsParticle.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class ForceGenerator {
 	public:
-		virtual void updateForce(Physics::PhysicsParticle* p, float time);
+		virtual void updateForce(Krazy::PhysicsParticle* p, float time);
 	};
 }
 

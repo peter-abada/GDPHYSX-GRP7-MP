@@ -3,7 +3,7 @@
 
 #include "ForceGenerator.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class DragForceGenerator : public ForceGenerator {
 	private:
 		float k1 = 0.74f;	

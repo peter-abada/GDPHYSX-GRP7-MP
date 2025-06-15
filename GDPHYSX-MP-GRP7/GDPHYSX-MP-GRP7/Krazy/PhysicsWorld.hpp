@@ -6,7 +6,7 @@
 #include "ForceRegistry.hpp"
 #include "GravityForceGenerator.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class PhysicsWorld {
 	public:
 		ForceRegistry forceRegistry;

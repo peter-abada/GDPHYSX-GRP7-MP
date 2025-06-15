@@ -3,7 +3,7 @@
 
 #include "glm/glm.hpp"
 
-namespace Physics {
+namespace Krazy {
 	class Vector {
 	public:
 		float x, y, z;
