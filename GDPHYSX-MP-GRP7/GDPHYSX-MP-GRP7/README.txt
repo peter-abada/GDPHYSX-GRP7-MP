@@ -1,4 +1,4 @@
-The Krazy Physics Engine
+The Krazy Krazy Engine
 For GDPHYSX XX22
 
 Created by Group 7:

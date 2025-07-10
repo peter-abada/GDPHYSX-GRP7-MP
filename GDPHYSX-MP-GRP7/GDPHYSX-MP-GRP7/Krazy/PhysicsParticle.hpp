@@ -19,6 +19,10 @@ namespace Krazy {
 
 		float damping = 0.9f;
 
+		float radius = 1.0f;
+
+		float restitution = 1.0f;
+
 	protected:
 		void updatePosition(float time);
 

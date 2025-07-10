@@ -127,7 +127,7 @@ class GravityForceGenerator > extends ForceGenerator
 			> constructor function
 
 		- void updateForce(PhysicsParticle* particle, float time)
-			@ Physics* particle - particle object to receive gravitational force
+			@ Krazy* particle - particle object to receive gravitational force
 			@ float time - time in milliseconds for updating particle object
 			> updates the particle object's gravitation force, does nothing if mass is a non-positive number
 

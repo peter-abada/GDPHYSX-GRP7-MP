@@ -136,6 +136,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Krazy\AnchoredSpring.hpp" />
+    <ClInclude Include="Krazy\Bungee.hpp" />
+    <ClInclude Include="Krazy\Chain.hpp" />
+    <ClInclude Include="Krazy\ContactResolver.hpp" />
+    <ClInclude Include="Krazy\ParticleContact.hpp" />
+    <ClInclude Include="Krazy\ParticleLink.hpp" />
+    <ClInclude Include="Krazy\ParticleSpring.hpp" />
+    <ClInclude Include="Krazy\Rod.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="OrthoCamera.hpp" />
     <ClInclude Include="Krazy\DragForceGenerator.hpp" />
@@ -154,6 +162,14 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Krazy\AnchoredSpring.cpp" />
+    <ClCompile Include="Krazy\Bungee.cpp" />
+    <ClCompile Include="Krazy\Chain.cpp" />
+    <ClCompile Include="Krazy\ContactResolver.cpp" />
+    <ClCompile Include="Krazy\ParticleContact.cpp" />
+    <ClCompile Include="Krazy\ParticleLink.cpp" />
+    <ClCompile Include="Krazy\ParticleSpring.cpp" />
+    <ClCompile Include="Krazy\Rod.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="OrthoCamera.cpp" />

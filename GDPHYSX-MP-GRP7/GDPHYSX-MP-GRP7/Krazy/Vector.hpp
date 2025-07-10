@@ -15,6 +15,8 @@ namespace Krazy {
 
 		float Magnitude();
 
+		float squareMagnitude();
+
 		//Direction via normalized vector
 		Vector Normalize();
 
