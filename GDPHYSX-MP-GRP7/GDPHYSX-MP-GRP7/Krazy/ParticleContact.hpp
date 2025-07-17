@@ -1,28 +1,25 @@
 #ifndef PARTICLECONTACT_HPP
 #define PARTICLECONTACT_HPP
 
-#include "PhysicsParticle.hpp"
+#include "Vector.hpp"
 
 namespace Krazy {
-	class ParticleContact {
-	public:
-		PhysicsParticle* particles[2];
-		
-		float restitution;
 
-		Vector contactNormal;
+    class PhysicsParticle;
 
-		void resolve(float time);
+    class ParticleContact {
+    public:
+        PhysicsParticle* particles[2] = { nullptr, nullptr };
+        float restitution = 1.0f;
+        Vector contactNormal;
+        float depth = 0.0f;
 
-		float depth;
+        void resolve(float time);
+        float getSeparatingSpeed() const;
+        void resolveVelocity(float time);
+        void resolveInterpenetration(float time);
+    };
 
-	//protected:
-		float getSeparatingSpeed();
-
-		void resolveVelocity(float time);
-
-		void resolveInterpenetration(float time);
-	};
 }
 
 #endif

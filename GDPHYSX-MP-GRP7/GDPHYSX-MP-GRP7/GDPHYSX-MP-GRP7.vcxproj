@@ -136,9 +136,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Chain.hpp" />
     <ClInclude Include="Krazy\AnchoredSpring.hpp" />
     <ClInclude Include="Krazy\Bungee.hpp" />
-    <ClInclude Include="Krazy\Chain.hpp" />
     <ClInclude Include="Krazy\ContactResolver.hpp" />
     <ClInclude Include="Krazy\ParticleContact.hpp" />
     <ClInclude Include="Krazy\ParticleLink.hpp" />
@@ -150,6 +150,7 @@
     <ClInclude Include="Krazy\ForceGenerator.hpp" />
     <ClInclude Include="Krazy\ForceRegistry.hpp" />
     <ClInclude Include="Krazy\GravityForceGenerator.hpp" />
+    <ClInclude Include="Krazy\ParticleCable.hpp" />
     <ClInclude Include="PersCamera.hpp" />
     <ClInclude Include="Krazy\PhysicsParticle.hpp" />
     <ClInclude Include="Krazy\PhysicsWorld.hpp" />
@@ -161,10 +162,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chain.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Krazy\AnchoredSpring.cpp" />
     <ClCompile Include="Krazy\Bungee.cpp" />
-    <ClCompile Include="Krazy\Chain.cpp" />
     <ClCompile Include="Krazy\ContactResolver.cpp" />
     <ClCompile Include="Krazy\ParticleContact.cpp" />
     <ClCompile Include="Krazy\ParticleLink.cpp" />
@@ -177,6 +178,7 @@
     <ClCompile Include="Krazy\ForceGenerator.cpp" />
     <ClCompile Include="Krazy\ForceRegistry.cpp" />
     <ClCompile Include="Krazy\GravityForceGenerator.cpp" />
+    <ClCompile Include="Krazy\ParticleCable.cpp" />
     <ClCompile Include="PersCamera.cpp" />
     <ClCompile Include="Krazy\PhysicsParticle.cpp" />
     <ClCompile Include="Krazy\PhysicsWorld.cpp" />

@@ -27,6 +27,10 @@ namespace Krazy {
 
 		void update(float time);
 
+		void setGravity(const GravityForceGenerator& g);
+
+		void enforceCableConstraints();
+
 	protected:
 		ContactResolver contactResolver = ContactResolver(20);
 

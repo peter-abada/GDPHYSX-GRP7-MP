@@ -1,67 +1,60 @@
 #include "ParticleContact.hpp"
+#include "PhysicsParticle.hpp"
 
-float Krazy::ParticleContact::getSeparatingSpeed() {
-	Vector velocity = particles[0]->velocity;
+namespace Krazy {
 
-	if (particles[1]) 
-		velocity -= particles[1]->velocity;
+    void ParticleContact::resolve(float time) {
+        resolveVelocity(time);
+        resolveInterpenetration(time);
+    }
 
-	return velocity , contactNormal;
-}
+    float ParticleContact::getSeparatingSpeed() const {
+        Vector relativeVel = particles[0]->velocity;
+        if (particles[1]) relativeVel = relativeVel - particles[1]->velocity;
+        return relativeVel.x * contactNormal.x + relativeVel.y * contactNormal.y + relativeVel.z * contactNormal.z;
+    }
 
-void Krazy::ParticleContact::resolveVelocity(float time) {
-	float separatingSpeed = getSeparatingSpeed();
+    void ParticleContact::resolveVelocity(float time) {
+        float separatingSpeed = getSeparatingSpeed();
+        if (separatingSpeed > 0) return;
 
-	if (separatingSpeed > 0) return;
+        float newSepSpeed = -separatingSpeed * restitution;
 
-	float newSS = -restitution * separatingSpeed;
+        float totalInverseMass = 0.0f;
+        if (particles[0] && particles[0]->mass > 0.0f)
+            totalInverseMass += 1.0f / particles[0]->mass;
+        if (particles[1] && particles[1]->mass > 0.0f)
+            totalInverseMass += 1.0f / particles[1]->mass;
 
-	float deltaSpeed = newSS - separatingSpeed;
+        if (totalInverseMass <= 0.0f) return;
 
-	float totalMass = (float)1 / particles[0]->mass;
-	if (particles[1])
-		totalMass += (float)1 / particles[1]->mass;
+        float deltaSpeed = newSepSpeed - separatingSpeed;
+        float impulse = deltaSpeed / totalInverseMass;
+        Vector impulsePerIMass = contactNormal * impulse;
 
-	if (totalMass <= 0) return;
+        if (particles[0] && particles[0]->mass > 0.0f)
+            particles[0]->velocity = particles[0]->velocity + impulsePerIMass * (1.0f / particles[0]->mass);
+        if (particles[1] && particles[1]->mass > 0.0f)
+            particles[1]->velocity = particles[1]->velocity - impulsePerIMass * (1.0f / particles[1]->mass);
+    }
 
-	float impulse_mag = deltaSpeed / totalMass;
-	Vector impulse = contactNormal * impulse_mag;
+    void ParticleContact::resolveInterpenetration(float time) {
+        if (depth <= 0.0f) return;
 
-	Vector V_a = impulse * ((float)1 / particles[0]->mass);
-	particles[0]->velocity = particles[0]->velocity + V_a;
+        float totalInverseMass = 0.0f;
+        if (particles[0] && particles[0]->mass > 0.0f)
+            totalInverseMass += 1.0f / particles[0]->mass;
+        if (particles[1] && particles[1]->mass > 0.0f)
+            totalInverseMass += 1.0f / particles[1]->mass;
 
-	if (particles[1]) {
-		Vector V_b = impulse * ((float)1 / particles[1]->mass);
-		particles[1]->velocity = particles[1]->velocity + V_b;
-	}
-}
+        if (totalInverseMass <= 0.0f) return;
 
-void Krazy::ParticleContact::resolve(float time) {
-	resolveVelocity(time);
-	resolveInterpenetration(time);
-}
+        Vector movePerIMass = contactNormal * (depth / totalInverseMass);
 
-void Krazy::ParticleContact::resolveInterpenetration(float time) {
-	if (depth <= 0) return;
-
-	float totalMass = (float)1 / particles[0]->mass;
-	if (particles[1])
-		totalMass += (float)1 / particles[1]->mass;
-
-	if (totalMass <= 0) return;
-
-	float totalMoveByMass = depth / totalMass;
-
-	Vector moveByMass = contactNormal * totalMoveByMass;
-
-	Vector P_a = moveByMass * ((float)1 / particles[0]->mass);
-	particles[0]->position += P_a;
-
-	if (particles[1]) {
-		Vector P_b = moveByMass * (-(float)1 / particles[1]->mass);
-		particles[1]->position += P_b;
-	}
-
-	depth = 0;
+        if (particles[0] && particles[0]->mass > 0.0f)
+            particles[0]->position = particles[0]->position + movePerIMass * (1.0f / particles[0]->mass);
+        if (particles[1] && particles[1]->mass > 0.0f)
+            particles[1]->position = particles[1]->position - movePerIMass * (1.0f / particles[1]->mass);
+    }
 
 }

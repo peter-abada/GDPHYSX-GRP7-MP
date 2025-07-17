@@ -1,93 +1,71 @@
 #include "Vector.hpp"
-namespace Krazy {
-	Vector::Vector() : x(0), y(0), z(0) {}
+#include <cmath>
 
+namespace Krazy {
+
+	Vector::Vector() : x(0), y(0), z(0) {}
 	Vector::Vector(const float _x, const float _y, const float _z) : x(_x), y(_y), z(_z) {}
 
-	float Vector::Magnitude() {
-		return sqrt((this->x * this->x) + (this->y * this->y) + (this->z * this->z));
+	float Vector::Magnitude() const {
+		return std::sqrt(x * x + y * y + z * z);
 	}
 
-	//Direction via normalized vector
-	Vector Vector::Normalize() {
-		Vector dir(this->x / Magnitude(), this->y / Magnitude(), this->z / Magnitude());
-
-		return dir;
+	float Vector::squareMagnitude() const {
+		return x * x + y * y + z * z;
 	}
 
-	float Vector::squareMagnitude() {
-		return (this->x * this->x) + (this->y * this->y) + (this->z * this->z);
+	Vector Vector::Normalize() const {
+		float mag = Magnitude();
+		if (mag == 0.0f) return Vector(0, 0, 0);
+		return Vector(x / mag, y / mag, z / mag);
 	}
 
-	Vector Vector::operator+ (const Vector rhs) {
-		Vector sum(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
-
-		return sum;
+	Vector Vector::operator+ (const Vector rhs) const {
+		return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
 	}
 
 	void Vector::operator+= (const Vector rhs) {
-		this->x += rhs.x;
-		this->y += rhs.y;
-		this->z += rhs.z;
+		x += rhs.x; y += rhs.y; z += rhs.z;
 	}
 
-	Vector Vector::operator- (const Vector rhs) {
-		Vector dif(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
-
-		return dif;
+	Vector Vector::operator- (const Vector rhs) const {
+		return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
 	}
 
 	void Vector::operator-= (const Vector rhs) {
-		this->x -= rhs.x;
-		this->y -= rhs.y;
-		this->z -= rhs.z;
+		x -= rhs.x; y -= rhs.y; z -= rhs.z;
 	}
 
-	//Scalar multiplication
-	Vector Vector::operator* (const float scalar) {
-		Vector prod(this->x * scalar, this->y * scalar, this->z * scalar);
-
-		return prod;
+	Vector Vector::operator* (const float scalar) const {
+		return Vector(x * scalar, y * scalar, z * scalar);
 	}
 
 	void Vector::operator*= (const float scalar) {
-		this->x *= scalar;
-		this->y *= scalar;
-		this->z *= scalar;
+		x *= scalar; y *= scalar; z *= scalar;
 	}
 
-	Vector Vector::operator/ (const float scalar) {
-		Vector prod(this->x / scalar, this->y / scalar, this->z / scalar);
-
-		return prod;
+	Vector Vector::operator/ (const float scalar) const {
+		return Vector(x / scalar, y / scalar, z / scalar);
 	}
 
 	void Vector::operator/= (const float scalar) {
-		this->x /= scalar;
-		this->y /= scalar;
-		this->z /= scalar;
+		x /= scalar; y /= scalar; z /= scalar;
 	}
 
-	//Dot product (can't overload '.')
-	float Vector::operator,(const Vector rhs) {
-		float prod = (this->x * rhs.x) + (this->y * rhs.y) + (this->z * rhs.z);
-
-		return prod;
+	float Vector::operator, (const Vector rhs) const {
+		return x * rhs.x + y * rhs.y + z * rhs.z;
 	}
 
-	//Cross product
-	Vector Vector::operator&(const Vector rhs) {
-		Vector prod((this->y * rhs.z) - (this->z * rhs.y),
-			(this->z * rhs.x) - (this->x * rhs.z),
-			(this->x * rhs.y) - (this->y * rhs.x));
-
-		return prod;
+	Vector Vector::operator& (const Vector rhs) const {
+		return Vector(
+			y * rhs.z - z * rhs.y,
+			z * rhs.x - x * rhs.z,
+			x * rhs.y - y * rhs.x
+		);
 	}
 
-	//Component product
-	Vector Vector::operator%(const Vector rhs) {
-		Vector prod(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
-
-		return prod;
+	Vector Vector::operator% (const Vector rhs) const {
+		return Vector(x * rhs.x, y * rhs.y, z * rhs.z);
 	}
+
 }

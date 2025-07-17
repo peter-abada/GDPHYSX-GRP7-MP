@@ -13,38 +13,38 @@ namespace Krazy {
 
 		explicit operator glm::vec3() const { return glm::vec3(x, y, z); }
 
-		float Magnitude();
+		float Magnitude() const;
 
-		float squareMagnitude();
+		float squareMagnitude() const;
 
 		//Direction via normalized vector
-		Vector Normalize();
+		Vector Normalize() const;
 
-		Vector operator+ (const Vector rhs);
+		Vector operator+ (const Vector rhs) const;
 
 		void operator+= (const Vector rhs);
 
-		Vector operator- (const Vector rhs);
+		Vector operator- (const Vector rhs) const;
 
 		void operator-= (const Vector rhs);
 
 		//Scalar multiplication
-		Vector operator* (const float scalar);
+		Vector operator* (const float scalar) const;
 
 		void operator*= (const float scalar);
 
-		Vector operator/ (const float scalar);
+		Vector operator/ (const float scalar) const;
 
 		void operator/= (const float scalar);
 
 		//Dot product (can't overload '.')
-		float operator, (const Vector rhs);
+		float operator, (const Vector rhs) const;
 
 		//Cross product
-		Vector operator& (const Vector rhs);
+		Vector operator& (const Vector rhs) const;
 
 		//Component product
-		Vector operator% (const Vector rhs);
+		Vector operator% (const Vector rhs) const;
 	};
 }
 
