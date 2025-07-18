@@ -20,6 +20,14 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "RenderParticle.hpp"
 #include "Krazy/ParticleCable.hpp"
 
+/*
+
+    Resolves collisions between particles in the simulation
+
+    PARAMETERS:
+    vector<PhysicsParticle*>& particles - The list of all particles in the simulation
+
+*/
 void resolveBallCollisions(std::vector<Krazy::PhysicsParticle*>& particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
         for (size_t j = i + 1; j < particles.size(); ++j) {
@@ -60,6 +68,14 @@ void resolveBallCollisions(std::vector<Krazy::PhysicsParticle*>& particles) {
     }
 }
 
+/*
+    Boolean function for checking if all particles are at rest (not moving)
+
+    PARAMETERS:
+    vector<PhysicsParticle*> particles - The list of all particles in the simulation
+    float anchorY - Y position of the anchor points the cables are hooked to
+    float cableLength - Length of the cables holding the particles
+*/
 bool allBallsAtRest(const std::vector<Krazy::PhysicsParticle*>& particles, float anchorY, float cableLength, float epsilon = 0.1f, float velEpsilon = 0.1f) {
     for (const auto* p : particles) {
         float dist = (p->position - Krazy::Vector(p->position.x, anchorY, 0)).Magnitude();
@@ -150,6 +166,7 @@ int main(void)
     glm::mat4 perspProjection = glm::perspective(perspFov, width / height, 0.1f, 2000.0f);
     glm::mat4* activeProjection = &orthoProjection;
 
+    //Lambda function for updating the camera orientation
     auto updateCamera = [&](float effectiveCamDistance) {
         float x = effectiveCamDistance * cos(camPitch) * cos(camYaw);
         float y = effectiveCamDistance * sin(camPitch);
@@ -172,6 +189,7 @@ int main(void)
 
     updateCamera(camDistance);
 
+    //User input for simulation parameters
     Krazy::PhysicsWorld world;
     std::vector<RenderParticle*> renderParticles;
     std::vector<Krazy::PhysicsParticle*> particles;
@@ -197,6 +215,7 @@ int main(void)
     float startX = -centerToCenter * 2;
     float anchorY = 30.0f;
 
+    //Generate particles for the simulation
     for (int i = 0; i < numBalls; ++i) {
         float x = startX + i * centerToCenter;
         float y = anchorY;
