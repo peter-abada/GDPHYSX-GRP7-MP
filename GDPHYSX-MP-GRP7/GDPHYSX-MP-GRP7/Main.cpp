@@ -11,6 +11,7 @@ constexpr std::chrono::nanoseconds timestep(16ms);
 #include "Model.hpp"
 #include "Camera.hpp"
 #include "OrthoCamera.hpp"
+#include "PersCamera.hpp"
 #include "Shader.hpp"
 
 #include "Krazy/Vector.hpp"
@@ -75,7 +76,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "GDPHYSX Group 7 - Newton's Cradle (Cable)", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "GDPHYSX-MP-GRP7 Engine - Newton's Cradle", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -84,6 +85,8 @@ int main(void)
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glViewport(0, 0, (int)width, (int)height);
+
+    glEnable(GL_DEPTH_TEST);
 
     Shader shader("Shaders/Shader.vert", "Shaders/Shader.frag");
     glLinkProgram(shader.getProg());
@@ -122,8 +125,52 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    glm::mat4 projection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
-    OrthoCamera camera(glm::vec3(0.0f, 0.0f, 60.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::vec3 target(0.0f, 0.0f, 0.0f);
+
+    float orthoHalfWidth = width / 2.0f;  
+    float orthoHalfHeight = height / 2.0f; 
+   
+    float orthoNear = 0.1f, orthoFar = 2000.0f;
+    float perspFov = glm::radians(45.0f);
+    float camDistance = 600.0f; 
+    float camDistancePersp = 1000.0f; 
+    float camYaw = glm::radians(90.0f);
+    float camPitch = glm::radians(20.0f);
+
+    glm::vec3 camPos = glm::vec3(0.0f, 0.0f, camDistance);
+    glm::vec3 camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 camFront = glm::normalize(camTarget - camPos);
+    glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    OrthoCamera orthoCamera(camPos, camUp, camFront);
+    PersCamera persCamera(camPos, camUp, camFront);
+    Camera* activeCamera = &orthoCamera;
+
+    glm::mat4 orthoProjection = glm::ortho(-orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, orthoNear, orthoFar);
+    glm::mat4 perspProjection = glm::perspective(perspFov, width / height, 0.1f, 2000.0f);
+    glm::mat4* activeProjection = &orthoProjection;
+
+    auto updateCamera = [&](float effectiveCamDistance) {
+        float x = effectiveCamDistance * cos(camPitch) * cos(camYaw);
+        float y = effectiveCamDistance * sin(camPitch);
+        float z = effectiveCamDistance * cos(camPitch) * sin(camYaw);
+
+        glm::vec3 camPos = target + glm::vec3(x, y, z);
+        glm::vec3 front = glm::normalize(target - camPos);
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        orthoCamera.setPosition(camPos);
+        orthoCamera.setFront(front);
+        orthoCamera.setUp(up);
+        orthoCamera.updateViewMatrix();
+
+        persCamera.setPosition(camPos);
+        persCamera.setFront(front);
+        persCamera.setUp(up);
+        persCamera.updateViewMatrix();
+        };
+
+    updateCamera(camDistance);
 
     Krazy::PhysicsWorld world;
     std::vector<RenderParticle*> renderParticles;
@@ -132,7 +179,7 @@ int main(void)
     std::cout << "Cable Length: ";
     std::cin >> cableLength;
     std::cout << "Particle Gap: ";
-    std::cin >> particleGap; 
+    std::cin >> particleGap;
     std::cout << "Particle Radius: ";
     std::cin >> particleRadius;
     std::cout << "Gravity Strength: ";
@@ -145,18 +192,17 @@ int main(void)
     std::cin >> forceZ;
 
     float centerToCenter = 2.0f * particleRadius + particleGap;
-    std::cout << "[INFO] Center-to-center distance is 2 * radius + gap = " << centerToCenter << std::endl;
 
     const int numBalls = 5;
-    float startX = -centerToCenter * 2; // Center the 3rd ball at x=0
-    float anchorY = 30.0f;              // Anchor height above origin
+    float startX = -centerToCenter * 2;
+    float anchorY = 30.0f;
 
     for (int i = 0; i < numBalls; ++i) {
         float x = startX + i * centerToCenter;
-        float y = anchorY; // Start at anchor point (top of cable)
+        float y = anchorY;
 
         Krazy::PhysicsParticle* ball = new Krazy::PhysicsParticle();
-        ball->position = Krazy::Vector(x, y, 0); // At anchor
+        ball->position = Krazy::Vector(x, y, 0);
         ball->mass = 50.0f;
         ball->velocity = Krazy::Vector(0, 0, 0);
         ball->damping = 0.98f;
@@ -172,7 +218,6 @@ int main(void)
         RenderParticle* ballRender = new RenderParticle(ball, ballModel, Krazy::Vector(0.7f, 0.7f, 1.0f));
         renderParticles.push_back(ballRender);
 
-        // Use ParticleCable for the cable constraint
         Krazy::ParticleCable* cable = new Krazy::ParticleCable(ball, Krazy::Vector(x, anchorY, 0), cableLength, 0.0f);
         world.links.push_back(cable);
 
@@ -184,6 +229,9 @@ int main(void)
     bool forceApplied = false;
     bool paused = false;
     bool spacePressed = false;
+    bool spacePressedLastFrame = false;
+    bool onePressedLastFrame = false;
+    bool twoPressedLastFrame = false;
 
     using clock = std::chrono::high_resolution_clock;
     auto curr_time = clock::now();
@@ -198,9 +246,35 @@ int main(void)
 
         glfwPollEvents();
 
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            spacePressed = true;
+        float orbitSpeed = 1.5f * (float)timestep.count() / 1e9f;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camYaw += orbitSpeed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camYaw -= orbitSpeed;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camPitch += orbitSpeed;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camPitch -= orbitSpeed;
+        float pitchLimit = glm::radians(89.0f);
+        if (camPitch > pitchLimit) camPitch = pitchLimit;
+        if (camPitch < -pitchLimit) camPitch = -pitchLimit;
+
+        // Camera mode switching (1 = ortho, 2 = perspective)
+        bool onePressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
+        bool twoPressed = glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS;
+        if (onePressed && !onePressedLastFrame) {
+            activeCamera = &orthoCamera;
+            activeProjection = &orthoProjection;
         }
+        if (twoPressed && !twoPressedLastFrame) {
+            activeCamera = &persCamera;
+            activeProjection = &perspProjection;
+        }
+        onePressedLastFrame = onePressed;
+        twoPressedLastFrame = twoPressed;
+
+        float effectiveCamDistance = (activeCamera == &persCamera) ? camDistancePersp : camDistance;
+        updateCamera(effectiveCamDistance);
+
+        bool spaceNow = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+        if (spaceNow && !spacePressedLastFrame) spacePressed = true;
+        spacePressedLastFrame = spaceNow;
 
         if (!forceApplied && allBallsAtRest(particles, anchorY, cableLength) && spacePressed) {
             particles[0]->addForce(Krazy::Vector(forceX, forceY, forceZ));
@@ -219,12 +293,22 @@ int main(void)
             }
         }
 
+        if (activeCamera == &orthoCamera) {
+            float scale = std::sqrt(2.0f);
+            orthoProjection = glm::ortho(
+                -orthoHalfWidth * scale, orthoHalfWidth * scale,
+                -orthoHalfHeight * scale, orthoHalfHeight * scale,
+                orthoNear, orthoFar
+            );
+        }
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shader.getProg());
-        unsigned int projLoc = glGetUniformLocation(shader.getProg(), "projection");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glm::mat4 viewMatrix = activeCamera->getViewMatrix();
+        glm::mat4 projView = (*activeProjection) * viewMatrix;
+        glUniformMatrix4fv(glGetUniformLocation(shader.getProg(), "projection"), 1, GL_FALSE, glm::value_ptr(projView));
 
+        // Draw cables as lines (from anchor to particle center)
         for (int i = 0; i < numBalls; ++i) {
             glm::vec3 anchor = glm::vec3(startX + i * centerToCenter, anchorY, 0.0f);
             glm::vec3 pos = glm::vec3(particles[i]->position.x, particles[i]->position.y, particles[i]->position.z);
@@ -264,7 +348,6 @@ int main(void)
             GLint colorLoc = glGetUniformLocation(shader.getProg(), "color");
             glUniform3f(colorLoc, rp->color.x, rp->color.y, rp->color.z);
 
-            // Set transform for the sphere
             GLint transformLoc = glGetUniformLocation(shader.getProg(), "transform");
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, pos);
@@ -272,17 +355,6 @@ int main(void)
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &model[0][0]);
 
             rp->draw();
-        }
-
-        static int debugFrame = 0;
-        if (++debugFrame >= 30) {
-            std::cout << "Ball positions: ";
-            for (size_t i = 0; i < particles.size(); ++i) {
-                const auto& p = particles[i]->position;
-                std::cout << "[" << i << "](" << p.x << ", " << p.y << ", " << p.z << ") ";
-            }
-            std::cout << std::endl;
-            debugFrame = 0;
         }
 
         glfwSwapBuffers(window);
