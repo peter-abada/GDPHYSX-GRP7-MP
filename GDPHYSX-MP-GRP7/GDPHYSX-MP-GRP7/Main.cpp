@@ -76,7 +76,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "GDPHYSX-MP-GRP7 Engine - Newton's Cradle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "GRP7 - Krazy Engine: Newton's Cradle", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
