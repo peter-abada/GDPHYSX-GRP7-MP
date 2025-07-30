@@ -1,9 +1,11 @@
 #include <chrono>
 using namespace std::chrono_literals;
 constexpr std::chrono::nanoseconds timestep(16ms);
+
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <limits>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -40,6 +42,7 @@ void resolveBallCollisions(std::vector<Krazy::PhysicsParticle*>& particles) {
             float dist = delta.Magnitude();
             float minDist = a->radius + b->radius;
 
+            // If balls overlap, resolve penetration and velocity
             if (dist < minDist && dist > 0.0001f) {
                 float penetration = minDist - dist;
                 Krazy::Vector normal = delta.Normalize();
@@ -48,12 +51,14 @@ void resolveBallCollisions(std::vector<Krazy::PhysicsParticle*>& particles) {
                 float invMassB = 1.0f / b->mass;
                 float totalInvMass = invMassA + invMassB;
 
+                // Move balls apart
                 a->position -= normal * (penetration * (invMassA / totalInvMass));
                 b->position += normal * (penetration * (invMassB / totalInvMass));
 
                 Krazy::Vector relVel = b->velocity - a->velocity;
                 float sepVel = relVel.x * normal.x + relVel.y * normal.y + relVel.z * normal.z;
 
+                // If balls are moving toward each other, apply impulse
                 if (sepVel < 0) {
                     float restitution = std::min(a->restitution, b->restitution);
                     float newSepVel = -sepVel * restitution;
@@ -68,21 +73,17 @@ void resolveBallCollisions(std::vector<Krazy::PhysicsParticle*>& particles) {
     }
 }
 
-/*
-    Boolean function for checking if all particles are at rest (not moving)
-
-    PARAMETERS:
-    vector<PhysicsParticle*> particles - The list of all particles in the simulation
-    float anchorY - Y position of the anchor points the cables are hooked to
-    float cableLength - Length of the cables holding the particles
-*/
-bool allBallsAtRest(const std::vector<Krazy::PhysicsParticle*>& particles, float anchorY, float cableLength, float epsilon = 0.1f, float velEpsilon = 0.1f) {
-    for (const auto* p : particles) {
-        float dist = (p->position - Krazy::Vector(p->position.x, anchorY, 0)).Magnitude();
-        if (std::abs(dist - cableLength) > epsilon) return false;
-        if (p->velocity.Magnitude() > velEpsilon) return false;
+// Finds the index of the ball with the highest y position
+int getTopBallIndex(const std::vector<Krazy::PhysicsParticle*>& particles) {
+    int topIdx = 0;
+    float maxY = particles[0]->position.y;
+    for (size_t i = 1; i < particles.size(); ++i) {
+        if (particles[i]->position.y > maxY) {
+            maxY = particles[i]->position.y;
+            topIdx = (int)i;
+        }
     }
-    return true;
+    return topIdx;
 }
 
 int main(void)
@@ -92,7 +93,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "GRP7 - Krazy Engine: Newton's Cradle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(width, height, "PC02 - Valdez", NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -103,11 +104,9 @@ int main(void)
     glViewport(0, 0, (int)width, (int)height);
 
     glEnable(GL_DEPTH_TEST);
-
     Shader shader("Shaders/Shader.vert", "Shaders/Shader.frag");
     glLinkProgram(shader.getProg());
 
-    // Load sphere mesh
     std::string path = "3D/sphere.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
@@ -143,30 +142,23 @@ int main(void)
 
     glm::vec3 target(0.0f, 0.0f, 0.0f);
 
-    float orthoHalfWidth = width / 2.0f;  
-    float orthoHalfHeight = height / 2.0f; 
-   
-    float orthoNear = 0.1f, orthoFar = 2000.0f;
+    // Camera setup
     float perspFov = glm::radians(45.0f);
-    float camDistance = 600.0f; 
-    float camDistancePersp = 1000.0f; 
+    float camDistancePersp = 100.0f;
     float camYaw = glm::radians(90.0f);
     float camPitch = glm::radians(20.0f);
 
-    glm::vec3 camPos = glm::vec3(0.0f, 0.0f, camDistance);
+    glm::vec3 camPos = glm::vec3(0.0f, 0.0f, camDistancePersp);
     glm::vec3 camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 camFront = glm::normalize(camTarget - camPos);
     glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    OrthoCamera orthoCamera(camPos, camUp, camFront);
     PersCamera persCamera(camPos, camUp, camFront);
-    Camera* activeCamera = &orthoCamera;
+    Camera* activeCamera = &persCamera;
 
-    glm::mat4 orthoProjection = glm::ortho(-orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, orthoNear, orthoFar);
     glm::mat4 perspProjection = glm::perspective(perspFov, width / height, 0.1f, 2000.0f);
-    glm::mat4* activeProjection = &orthoProjection;
+    glm::mat4* activeProjection = &perspProjection;
 
-    //Lambda function for updating the camera orientation
     auto updateCamera = [&](float effectiveCamDistance) {
         float x = effectiveCamDistance * cos(camPitch) * cos(camYaw);
         float y = effectiveCamDistance * sin(camPitch);
@@ -176,52 +168,75 @@ int main(void)
         glm::vec3 front = glm::normalize(target - camPos);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        orthoCamera.setPosition(camPos);
-        orthoCamera.setFront(front);
-        orthoCamera.setUp(up);
-        orthoCamera.updateViewMatrix();
-
         persCamera.setPosition(camPos);
         persCamera.setFront(front);
         persCamera.setUp(up);
         persCamera.updateViewMatrix();
         };
 
-    updateCamera(camDistance);
+    updateCamera(camDistancePersp);
 
-    //User input for simulation parameters
     Krazy::PhysicsWorld world;
     std::vector<RenderParticle*> renderParticles;
     std::vector<Krazy::PhysicsParticle*> particles;
-    float cableLength, particleGap, particleRadius, gravityStrength, forceX, forceY, forceZ;
-    std::cout << "Cable Length: ";
-    std::cin >> cableLength;
-    std::cout << "Particle Gap: ";
-    std::cin >> particleGap;
-    std::cout << "Particle Radius: ";
-    std::cin >> particleRadius;
-    std::cout << "Gravity Strength: ";
-    std::cin >> gravityStrength;
-    std::cout << "Apply Force\nX: ";
+
+    // Simulation parameters
+    const int numBalls = 5;
+    float cableLength = 30.0f;
+    float particleRadius = 5.0f;
+    float ballMass = 50.0f; 
+    float circleRadius = cableLength;
+
+    // Ball color names, prizes, and RGB colors
+    std::vector<std::string> ballNames = {
+        "Blue",
+        "Red",
+        "Green",
+        "Purple",
+        "Orange"
+    };
+    std::vector<std::string> ballPrizes = {
+        "Ice Card",
+        "Fire Card",
+        "30 Gold",
+        "Shop Ticket",
+        "Old Boot"
+    };
+    std::vector<Krazy::Vector> ballColors = {
+        Krazy::Vector(0.2f, 0.4f, 1.0f),   // Blue
+        Krazy::Vector(1.0f, 0.2f, 0.2f),   // Red
+        Krazy::Vector(0.2f, 1.0f, 0.3f),   // Green
+        Krazy::Vector(0.7f, 0.2f, 0.9f),   // Purple
+        Krazy::Vector(1.0f, 0.6f, 0.1f)    // Orange
+    };
+
+    std::cout << "List of colors and prizes:\n";
+    for (size_t i = 0; i < ballNames.size(); ++i) {
+        std::cout << ballNames[i] << " - Color: ("
+            << ballColors[i].x << ", "
+            << ballColors[i].y << ", "
+            << ballColors[i].z << ")"
+            << " - Prize: " << ballPrizes[i] << "\n";
+    }
+
+    float forceX, forceY;
+    std::cout << "Enter force to apply\nX: ";
     std::cin >> forceX;
     std::cout << "Y: ";
     std::cin >> forceY;
-    std::cout << "Z: ";
-    std::cin >> forceZ;
+    float forceZ = 0.0f;
 
-    float centerToCenter = 2.0f * particleRadius + particleGap;
-
-    const int numBalls = 5;
-    float startX = -centerToCenter * 2;
-    float anchorY = 30.0f;
-
-    //Generate particles for the simulation
+    glm::vec3 anchor(0.0f, 0.0f, 0.0f);
     for (int i = 0; i < numBalls; ++i) {
-        float x = startX + i * centerToCenter;
-        float y = anchorY;
+        // Arrange balls in a circle
+        float angle = glm::radians(90.0f - i * 360.0f / numBalls);
+        float x = circleRadius * cos(angle);
+        float y = circleRadius * sin(angle);
+        float z = 0.0f;
 
+        // Create physics particle for each ball
         Krazy::PhysicsParticle* ball = new Krazy::PhysicsParticle();
-        ball->position = Krazy::Vector(x, y, 0);
+        ball->position = Krazy::Vector(x, y, z);
         ball->mass = 50.0f;
         ball->velocity = Krazy::Vector(0, 0, 0);
         ball->damping = 0.98f;
@@ -231,27 +246,21 @@ int main(void)
         world.particles.push_back(ball);
         particles.push_back(ball);
 
-        Model* ballModel = new Model(glm::vec3(x, y, 0), shader.getProg(), VAO, mesh_indices);
+        Model* ballModel = new Model(glm::vec3(x, y, z), shader.getProg(), VAO, mesh_indices);
         glm::vec3 scaleVec(particleRadius, particleRadius, particleRadius);
         ballModel->setScale(scaleVec);
-        RenderParticle* ballRender = new RenderParticle(ball, ballModel, Krazy::Vector(0.7f, 0.7f, 1.0f));
+        RenderParticle* ballRender = new RenderParticle(ball, ballModel, ballColors[i]);
         renderParticles.push_back(ballRender);
-
-        Krazy::ParticleCable* cable = new Krazy::ParticleCable(ball, Krazy::Vector(x, anchorY, 0), cableLength, 0.0f);
+        Krazy::ParticleCable* cable = new Krazy::ParticleCable(ball, Krazy::Vector(anchor.x, anchor.y, anchor.z), cableLength, 0.0f);
         world.links.push_back(cable);
-
-        std::cout << "Ball " << i << " initial pos: (" << x << ", " << y << ", " << 0 << ")\n";
     }
 
-    world.setGravity(Krazy::GravityForceGenerator(Krazy::Vector(0, -gravityStrength, 0)));
-    bool gravityEnabled = false;
-    bool forceApplied = false;
-    bool paused = false;
-    bool spacePressed = false;
-    bool spacePressedLastFrame = false;
-    bool onePressedLastFrame = false;
-    bool twoPressedLastFrame = false;
+    // Apply inputted force to top particle
+    particles[0]->addForce(Krazy::Vector(forceX, forceY, forceZ));
 
+    bool paused = false;
+    bool frozen = false;
+    bool waitingForEnter = false;
     using clock = std::chrono::high_resolution_clock;
     auto curr_time = clock::now();
     auto prev_time = curr_time;
@@ -265,60 +274,25 @@ int main(void)
 
         glfwPollEvents();
 
-        float orbitSpeed = 1.5f * (float)timestep.count() / 1e9f;
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camYaw += orbitSpeed;
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camYaw -= orbitSpeed;
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camPitch += orbitSpeed;
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camPitch -= orbitSpeed;
-        float pitchLimit = glm::radians(89.0f);
-        if (camPitch > pitchLimit) camPitch = pitchLimit;
-        if (camPitch < -pitchLimit) camPitch = -pitchLimit;
+        updateCamera(camDistancePersp);
 
-        // Camera mode switching (1 = ortho, 2 = perspective)
-        bool onePressed = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
-        bool twoPressed = glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS;
-        if (onePressed && !onePressedLastFrame) {
-            activeCamera = &orthoCamera;
-            activeProjection = &orthoProjection;
-        }
-        if (twoPressed && !twoPressedLastFrame) {
-            activeCamera = &persCamera;
-            activeProjection = &perspProjection;
-        }
-        onePressedLastFrame = onePressed;
-        twoPressedLastFrame = twoPressed;
-
-        float effectiveCamDistance = (activeCamera == &persCamera) ? camDistancePersp : camDistance;
-        updateCamera(effectiveCamDistance);
-
-        bool spaceNow = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-        if (spaceNow && !spacePressedLastFrame) spacePressed = true;
-        spacePressedLastFrame = spaceNow;
-
-        if (!forceApplied && allBallsAtRest(particles, anchorY, cableLength) && spacePressed) {
-            particles[0]->addForce(Krazy::Vector(forceX, forceY, forceZ));
-            forceApplied = true;
-            gravityEnabled = true;
-            world.setGravity(Krazy::GravityForceGenerator(Krazy::Vector(0, -gravityStrength, 0)));
-            std::cout << "[DEBUG] All balls at rest and space pressed. Force applied to particle 0: (" << forceX << ", " << forceY << ", " << forceZ << ")\n";
+        // Freeze simulation on SPACE key, quit on ENTER key
+        if (!frozen && glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            for (auto* p : particles) {
+                p->velocity = Krazy::Vector(0, 0, 0);
+            }
+            frozen = true;
+            waitingForEnter = true;
+            std::cout << "\nPress ENTER to exit\n";
         }
 
         if (curr_ns >= timestep) {
             auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(curr_ns);
             curr_ns -= curr_ns;
-            if (!paused) {
+            if (!paused && !frozen) {
                 world.update((float)ms.count() / 1000.0f);
                 resolveBallCollisions(particles);
             }
-        }
-
-        if (activeCamera == &orthoCamera) {
-            float scale = std::sqrt(2.0f);
-            orthoProjection = glm::ortho(
-                -orthoHalfWidth * scale, orthoHalfWidth * scale,
-                -orthoHalfHeight * scale, orthoHalfHeight * scale,
-                orthoNear, orthoFar
-            );
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -327,13 +301,13 @@ int main(void)
         glm::mat4 projView = (*activeProjection) * viewMatrix;
         glUniformMatrix4fv(glGetUniformLocation(shader.getProg(), "projection"), 1, GL_FALSE, glm::value_ptr(projView));
 
-        // Draw cables as lines (from anchor to particle center)
+        // Render lines for cables
         for (int i = 0; i < numBalls; ++i) {
-            glm::vec3 anchor = glm::vec3(startX + i * centerToCenter, anchorY, 0.0f);
+            glm::vec3 anchorPos = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::vec3 pos = glm::vec3(particles[i]->position.x, particles[i]->position.y, particles[i]->position.z);
 
             float lineVertices[] = {
-                anchor.x, anchor.y, anchor.z,
+                anchorPos.x, anchorPos.y, anchorPos.z,
                 pos.x, pos.y, pos.z
             };
 
@@ -359,7 +333,7 @@ int main(void)
             glDeleteVertexArrays(1, &lineVAO);
         }
 
-        // Draw particles
+        // Render particles
         for (auto* rp : renderParticles) {
             glm::vec3 pos(rp->particle->position.x, rp->particle->position.y, rp->particle->position.z);
             rp->renderObj->setPosition(pos);
@@ -375,9 +349,22 @@ int main(void)
 
             rp->draw();
         }
+        if (waitingForEnter) {
+            if (std::cin.rdbuf()->in_avail() > 0) {
+                char c = std::cin.get();
+                if (c == '\n') {
+                    break;
+                }
+            }
+        }
 
         glfwSwapBuffers(window);
     }
+
+    // Print highest particle and corresponding prize
+    int topIdx = getTopBallIndex(particles);
+    std::cout << "\nTop most ball is " << ballNames[topIdx] << ".\n";
+    std::cout << "You win: " << ballPrizes[topIdx] << "!\n";
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
